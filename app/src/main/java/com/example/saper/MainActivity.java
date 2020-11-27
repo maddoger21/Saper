@@ -26,15 +26,15 @@ import static java.lang.Integer.parseInt;
 
 public class MainActivity extends Activity implements OnClickListener, OnLongClickListener {
     private int WIDTH = 10; // ширина поля
-    private int HEIGHT = 10; // высота поля
-    int numMines = 10; // количество мин
+    private int HEIGHT = 18; // высота поля
+    int numMines = 25; // количество мин
 
     private Button[][] cells; // массив клеток
-    private boolean[][] flags = new boolean[WIDTH][HEIGHT];
+    private boolean[][] flags = new boolean[WIDTH][HEIGHT]; // массив красные флажки
     boolean[][] revealed = new boolean[WIDTH][HEIGHT]; // массив открытых клеток
     int[][] mines = new int[WIDTH][HEIGHT]; // массив мин
 
-    @Override
+    @Override//старт программы
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.cells);
@@ -56,7 +56,7 @@ public class MainActivity extends Activity implements OnClickListener, OnLongCli
 
 
 
-//создаем клетки
+    //создаем клетки
     void makeCells() {
         cells = new Button[WIDTH][HEIGHT];
         GridLayout cellsLayout = (GridLayout) findViewById(R.id.CellsLayout);
@@ -75,7 +75,7 @@ public class MainActivity extends Activity implements OnClickListener, OnLongCli
     }
 
 
-//рандомно генерируем поле с минами
+    //рандомно генерируем поле с минами
     void generate() {
         int c=0;
         while(c<numMines){//заполняем поле минами до определенного количесвта
@@ -83,21 +83,21 @@ public class MainActivity extends Activity implements OnClickListener, OnLongCli
             int y=(int)(Math.random() * (HEIGHT));
             if(mines[x][y] != 1) {
                 mines[x][y] = 1;
-                cells[x][y].setText("M");
+                //cells[x][y].setText("M");
                 c++;
             }
             //cells[x][y].setTextColor(0);
         }
     }
 
-// считывание координат клетки
+    // считывание координат клетки
     int getX(View v) { return Integer.parseInt(((String) v.getTag()).split(",")[1]); }
 
     int getY(View v) { return Integer.parseInt(((String) v.getTag()).split(",")[0]); }
 
 //реакция на клик мыши
 
-boolean firstClick=true; // первый клик никогда не мина
+    boolean firstClick=true; // первый клик никогда не мина
     @Override
     public void onClick(View v) {
         Button tappedCell = (Button) v;
@@ -109,19 +109,22 @@ boolean firstClick=true; // первый клик никогда не мина
         //Message.showMessage(this, Integer.toString(tappedX) + " " + Integer.toString(tappedY));
         if (firstClick) { // избегаем первого клика на мину
             firstClick=false;
-           do {
+            do {
                 clearMines();
                 generate();
             } while (minesNear(tappedX,tappedY)!=0); // находим ситуацию когда мин вокруг нет
         }
-        if (mines[tappedX][tappedY] == 1) { //если нажали на мину
+        if(flags[tappedX][tappedY]){
+            tappedCell.setBackgroundColor(Color.RED);
+        }
+        else if (mines[tappedX][tappedY] == 1) { //если нажали на мину
             Message.showMessage(this, "MINA");// ПРОИГРЫШ
             clearMines();  // все заново
             firstClick=true;
             makeCells();
             generate();
         } else
-         {//Не проиграли? продолжаем игру
+        {//Не проиграли? продолжаем игру
 
             reveal(tappedX, tappedY);
         }
